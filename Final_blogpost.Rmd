@@ -13,3 +13,60 @@ output:
 knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
 ```
 
+```{r, echo = FALSE}
+library(tidyverse)
+library(lubridate)
+library(maps)
+library(ggmap)
+library(ggplot2)
+library(RColorBrewer)
+library(ggthemes)
+library(maps)          # for map data
+library(gplots)        # for col2hex() function
+library(RColorBrewer)  # for color palettes
+library(sf)            # for working with spatial data
+library(leaflet)       # for highly customizable mapping
+library(ggimage)
+theme_set(theme_minimal())
+```
+
+```{r}
+soil <- read_csv("soil_magnetism_data.csv")
+```
+
+
+### Introduction to the Data
+
+#### Background
+
+#### Methods
+
+(maps here)
+
+#### Research Question
+
+
+\
+\
+
+
+### Diving into the Data
+
+#### Roads
+
+#### Traffic Classification
+
+#### Limitations
+
+\
+\
+
+
+### Wrap-up & Takeaways
+
+
+
+
+
+
+
