@@ -144,3 +144,38 @@ soil_coord %>%
 ```
 
 
+```{r}
+soil_longer <- soil %>% 
+  pivot_longer(M1:M11, names_to = "site_id", values_to = "mag_sus")
+```
+
+```{r}
+soil_longer %>% 
+  filter(avg_outlier == "average",
+         state == "Minnesota") %>% 
+  mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high")) %>%
+  ggplot(aes(x = road, y = mag_sus)) +
+  geom_boxplot(aes(fill = traffic_class), alpha = 0.5) +
+  labs(y = "Magnetic Susceptibility (SI)",
+       x = "") +
+  scale_fill_manual(values = c("#93BA98", "#FBD061", "#E14E42")) +
+  coord_flip()
+```
+
+```{r}
+soil_longer %>% 
+  filter(avg_outlier == "average",
+         state == "Georgia") %>% 
+  mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high")) %>%
+  ggplot(aes(x = road, y = mag_sus)) +
+  geom_boxplot(aes(fill = traffic_class), alpha = 0.5) +
+  labs(x = "",
+       y = "Magnetic Susceptibility (SI)") +
+  facet_wrap(~traffic_class, 
+             scales = "free",
+             nrow = 3) + 
+  scale_fill_manual(values = c("#93BA98", "#FBD061", "#E14E42")) +
+  coord_flip()
+```
+
+

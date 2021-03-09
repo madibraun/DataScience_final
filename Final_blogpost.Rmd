@@ -1,0 +1,15 @@
+---
+title: "Final Blogpost"
+author: "Madeline Braun, Emily Lugthart"
+date: "3/9/2021"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    theme: flatly
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, error=TRUE, message=FALSE, warning=FALSE)
+```
+
