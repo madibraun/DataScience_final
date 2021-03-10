@@ -21,19 +21,21 @@ library(ggmap)
 library(ggplot2)
 library(RColorBrewer)
 library(ggthemes)
-library(maps)          # for map data
-library(gplots)        # for col2hex() function
-library(RColorBrewer)  # for color palettes
-library(sf)            # for working with spatial data
-library(leaflet)       # for highly customizable mapping
+library(maps)          
+library(gplots)        
+library(RColorBrewer)  
+library(sf)            
+library(leaflet)       
 library(ggimage)
+library(patchwork)
 theme_set(theme_minimal())
 ```
 
-```{r}
+```{r, echo = FALSE}
 soil <- read_csv("soil_magnetism_data.csv")
 ```
 
+\
 
 ### Introduction to the Data
 
@@ -41,7 +43,81 @@ soil <- read_csv("soil_magnetism_data.csv")
 
 #### Methods
 
-(maps here)
+
+```{r, echo = FALSE}
+all_sites <- tibble(
+  road = c("Babb Road", "Old Babb Road", "I-75 Walnut Avenue Offramp",
+            "Walnut Avenue", "Mill Creek Road", "Utility Road",
+            "Dalton Bypass Corporate Drive", "Dalton Bypass Caunasauga Drive",
+            "George Rice Drive", "College Drive", "Shepard Road", 
+            "Mississippi River Boulevard", "Brimhall Street", "Inver Grove Trail"),
+  long = c(-85.040827, -85.055768, -85.002817,
+            -85.000087, -85.041725, -85.051626,
+            -84.940111, -84.980521, -85.003035,
+            -85.002238, -93.145852, -93.197918, 
+            -93.165680, -93.029480),
+  lat = c(34.736550, 34.745755, 34.761234,
+          34.761107, 34.735628, 34.784041,
+          34.712289, 34.697031, 34.769729,
+          34.771593, 44.909581, 44.914092, 
+          44.932071, 44.811813)
+)
+```
+
+```{r, echo = FALSE}
+soil_coord <- left_join(
+  soil,
+  all_sites
+)
+```
+
+```{r, echo = FALSE}
+soil_coord <- soil_coord %>% 
+  mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high"))
+pal <- colorFactor(c("#93BA98", "#FBD061", "#E14E42"), 
+                     domain = soil_coord$traffic_class)
+soil_coord %>% 
+  filter(state == "Minnesota", 
+         distance_cm == 10) %>%
+  leaflet() %>% 
+    addProviderTiles("CartoDB.Voyager") %>% 
+    addCircleMarkers(color = ~pal(traffic_class),
+               fillOpacity = .7,
+               label = ~paste(str_to_title(road),
+                              ", Average Magnetic Susceptibility: ",
+                              sus_avg),
+               stroke = FALSE,
+               radius = 10) %>% 
+    addLegend(position = "bottomright",
+             pal = pal, 
+             values = ~traffic_class,
+             title = "Traffic Volume Classification")
+```
+
+
+```{r, echo = FALSE}
+soil_coord <- soil_coord %>% 
+  mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high"))
+pal <- colorFactor(c("#93BA98", "#FBD061", "#E14E42"), 
+                     domain = soil_coord$traffic_class)
+soil_coord %>% 
+  filter(state == "Georgia", 
+         distance_cm == 10) %>%
+  leaflet() %>% 
+    addProviderTiles("CartoDB.Voyager") %>% 
+    addCircleMarkers(color = ~pal(traffic_class),
+               fillOpacity = .7,
+               label = ~paste(str_to_title(road),
+                              ", Average Magnetic Susceptibility: ",
+                              sus_avg),
+               stroke = FALSE,
+               radius = 10) %>% 
+    addLegend(position = "bottomright",
+             pal = pal, 
+             values = ~traffic_class,
+             title = "Traffic Volume Classification")
+```
+
 
 #### Research Question
 
@@ -55,6 +131,50 @@ soil <- read_csv("soil_magnetism_data.csv")
 #### Roads
 
 #### Traffic Classification
+
+
+```{r, echo = FALSE}
+soil_longer <- soil %>% 
+  pivot_longer(M1:M11, names_to = "site_id", values_to = "mag_sus")
+```
+
+```{r, echo = FALSE}
+minnesota_plot <- soil_longer %>% 
+  filter(avg_outlier == "average",
+         state == "Minnesota") %>% 
+  mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high")) %>%
+  ggplot(aes(x = road, y = mag_sus)) +
+  geom_boxplot(aes(fill = traffic_class), alpha = 0.5) +
+  labs(y = "Magnetic Susceptibility (SI)",
+       x = "",
+       title = "Minnesota Roads") +
+  scale_fill_manual(values = c("#93BA98", "#FBD061", "#E14E42")) +
+  coord_flip()
+```
+
+```{r, echo = FALSE}
+georgia_plot <- soil_longer %>% 
+  filter(avg_outlier == "average",
+         state == "Georgia") %>% 
+  mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high")) %>%
+  ggplot(aes(x = road, y = mag_sus)) +
+  geom_boxplot(aes(fill = traffic_class), alpha = 0.5) +
+  labs(x = "",
+       y = "Magnetic Susceptibility (SI)",
+       title = "Georgia Roads") +
+  facet_wrap(~traffic_class, 
+             scales = "free",
+             nrow = 3) + 
+  scale_fill_manual(values = c("#93BA98", "#FBD061", "#E14E42")) +
+  theme(strip.text.x = element_blank()) +
+  coord_flip()
+```
+
+```{r, fig.width=8, fig.height=8, echo = FALSE}
+minnesota_plot + georgia_plot + plot_layout(nrow=2) + plot_annotation(title = "Magnetic Susceptibility of Roadside Soils", subtitle = "By Traffic Volume Type")
+```
+
+
 
 #### Limitations
 
