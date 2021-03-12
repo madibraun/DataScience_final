@@ -141,7 +141,7 @@ The questions we aim to answer are: How is magnetic susceptibility related to tr
 
 #### Roads
 
-First, let's take a look at how magnetic susceptibility is related to traffic volume. The graphs below depict magnetic susceptibility taken at different distances from each road. They are organized into low, medium, and high traffic roads. We will discuss the implications of their patterns shortly. 
+First, let's take a look at how magnetic susceptibility is related to traffic volume. The graphs below depict magnetic susceptibility taken at different distances from all roads. They are organized into low, medium, and high traffic roads. We will discuss the implications of their patterns shortly. 
 
 Each magnetic susceptibility measurement is an average of the cumulative measurements taken at a given distance along a particular road. It is important to note that some data are depicted as points on these graphs, which represent outliers for their respective roads (distinguished by color). These outliers were isolated from averages. Points were determined to be outliers if they were an order of magnitude larger than other magnetic susceptibility measurements for a given road. Additionally, keep in mind that the y-axis scale for high traffic roads is larger than that of the low and medium traffic roads.
 
@@ -221,11 +221,14 @@ g3 <- soil %>%
 
 What are these graphs telling us? While the magnetic susceptibility of soils becomes more similar across traffic volumes with distance from the road, we do see an interesting pattern at shorter distances. For high traffic roads, measurements taken at distances less than 200 cm exhibit magnetic susceptibility that is noticeably higher than medium and low traffic roads, even when accounting for scaling of the y-axis. 
 
-What does this mean? This could indicate that more vehicle traffic leads to the emission of more pollutants on roadside soils. 
+What does this mean? This could indicate that more vehicle traffic leads to the emission of more pollutants on roadside soils. Since background susceptibility levels seem to be similar, as demonstrated at larger distances, we can hypothesize that the patterns we see at shorter distances are consequential of traffic volume rather than other variables.
 
 
 #### Traffic Classification
 
+Let's move on to examine how these patterns compare between the states of Minnesota and Georgia. Minnesota data were taken within the Twin Cities metro area, while Georgia data were taken in and around Dalton, which is a small city in northwest Georgia. The following graphs compare magnetic susceptibility data between states and road classifications. 
+
+Again, be wary that the scales for each graph's x-axis are not the same, and outlier points are omitted. These plots use individual data points rather than averages at each distance.
 
 ```{r, echo = FALSE}
 soil_longer <- soil %>% 
@@ -257,10 +260,10 @@ georgia_plot <- soil_longer %>%
        y = "Magnetic Susceptibility (SI)",
        title = "Georgia Roads") +
   facet_wrap(~traffic_class, 
-             scales = "free",
              nrow = 3) + 
   scale_fill_manual(values = c("#93BA98", "#FBD061", "#E14E42")) +
   theme(strip.text.x = element_blank()) +
+  ylim(0, 0.004) +
   coord_flip()
 ```
 
@@ -268,9 +271,17 @@ georgia_plot <- soil_longer %>%
 minnesota_plot + georgia_plot + plot_layout(nrow=2) + plot_annotation(title = "Magnetic Susceptibility of Roadside Soils", subtitle = "By Traffic Volume Type")
 ```
 
+\
 
+What are these graphs telling us? We can see that a general pattern is sustained between the two states, wherein magnetic susceptibility is slightly higher on average for high traffic roads. 
 
-#### Limitations
+What does this mean? Since averages between states are similar, it is likely that factors like climate and soil parent material (the material the soil has formed from ie. rock or river sediment) are not significantly influencing magnetic susceptibility values.
+
+#### Limitations/Future Directions
+
+While this short study looks at magnetic susceptibility as a factor of pollution levels, we have no other pollution data to compare it to. In future studies, it would be beneficial to compare magnetic susceptibility data to pollution data.  
+
+Additionally, further analysis is necessariy in order to determine if our previously described findings are statistically significant, either by further diving into the relationship between traffic volume, distance, and magnetic susceptibility, or via model-building.
 
 \
 \
