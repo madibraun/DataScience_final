@@ -41,8 +41,17 @@ soil <- read_csv("soil_magnetism_data.csv")
 
 #### Background
 
-#### Methods
+In recent years studies have focused on the influence of topsoil pollution as a concerning effect of human-soil interaction. Of particular note is roadside pollution, a result of heavy metal emissions from gas and diesel engines, as well as engine and brake pad wear. 
 
+Magnetic susceptibility measures the induced magnetization of a material resulting from an applied magnetic field (Maxbauer et al., 2016). It gives you a general sense how much magnetic material is in a substance. Because iron-bearing particles are produced during combustion and from vehicle wear, magnetic susceptibility can be used to measure the extent of pollution produced by the same processes. Magnetic enhancement, as measured by magnetic susceptibility, is considered to be a useful proxy to determine the presence of pollutants related to combustion. 
+
+This study, a portion of Emily Lugthart's honors thesis in Geology, aims to investigate magnetic enhancement along roads in relation to pollutants caused by vehicles. We will explore the relationship between traffic volume and magnetic susceptibility, both by state and by the individual roads from which samples were taken.
+
+#### Data Collection
+
+Magnetic susceptibility measurements were taken from sites along Minnesota and Georgia roads, particularly in the St. Paul, MN and Dalton, GA. At each site, measurements were taken at various distances perpendicular to the road. At least three susceptibility measurements were taken at each distance to maximize accuracy.
+
+The maps below depict the geographic locations of each measurement site. The colors represent the traffic volume classification of the adjacent road, which was determined from state DOT data.
 
 ```{r, echo = FALSE}
 all_sites <- tibble(
@@ -76,26 +85,10 @@ soil_coord <- soil_coord %>%
   mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high"))
 pal <- colorFactor(c("#93BA98", "#FBD061", "#E14E42"), 
                      domain = soil_coord$traffic_class)
-soil_coord %>% 
-  filter(state == "Minnesota", 
-         distance_cm == 10) %>%
-  leaflet() %>% 
-    addProviderTiles("CartoDB.Voyager") %>% 
-    addCircleMarkers(color = ~pal(traffic_class),
-               fillOpacity = .7,
-               label = ~paste(str_to_title(road),
-                              ", Average Magnetic Susceptibility: ",
-                              sus_avg),
-               stroke = FALSE,
-               radius = 10) %>% 
-    addLegend(position = "bottomright",
-             pal = pal, 
-             values = ~traffic_class,
-             title = "Traffic Volume Classification")
 ```
 
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, fig.show = "hold"}
 soil_coord <- soil_coord %>% 
   mutate(traffic_class = fct_relevel(traffic_class, "low", "medium", "high"))
 pal <- colorFactor(c("#93BA98", "#FBD061", "#E14E42"), 
@@ -116,11 +109,29 @@ soil_coord %>%
              pal = pal, 
              values = ~traffic_class,
              title = "Traffic Volume Classification")
+
+soil_coord %>% 
+  filter(state == "Minnesota", 
+         distance_cm == 10) %>%
+  leaflet() %>% 
+    addProviderTiles("CartoDB.Voyager") %>% 
+    addCircleMarkers(color = ~pal(traffic_class),
+               fillOpacity = .7,
+               label = ~paste(str_to_title(road),
+                              ", Average Magnetic Susceptibility: ",
+                              sus_avg),
+               stroke = FALSE,
+               radius = 10) %>% 
+    addLegend(position = "bottomright",
+             pal = pal, 
+             values = ~traffic_class,
+             title = "Traffic Volume Classification")
 ```
 
 
 #### Research Question
 
+The questions we aim to answer are: How is magnetic susceptibility related to traffic volume? Are these patterns consistent between states?
 
 \
 \
@@ -129,6 +140,89 @@ soil_coord %>%
 ### Diving into the Data
 
 #### Roads
+
+First, let's take a look at how magnetic susceptibility is related to traffic volume. The graphs below depict magnetic susceptibility taken at different distances from each road. They are organized into low, medium, and high traffic roads. We will discuss the implications of their patterns shortly. 
+
+Each magnetic susceptibility measurement is an average of the cumulative measurements taken at a given distance along a particular road. It is important to note that some data are depicted as points on these graphs, which represent outliers for their respective roads (distinguished by color). These outliers were isolated from averages. Points were determined to be outliers if they were an order of magnitude larger than other magnetic susceptibility measurements for a given road. Additionally, keep in mind that the y-axis scale for high traffic roads is larger than that of the low and medium traffic roads.
+
+
+```{r, echo = FALSE, fig.height = 10, fig.width = 10}
+magdata_outlier_low <- soil %>% 
+  filter(traffic_class == "low") %>% 
+  filter(avg_outlier == "outlier") 
+
+magdata_outlier_medium <- soil %>% 
+  filter(traffic_class == "medium") %>% 
+  filter(avg_outlier == "outlier") 
+
+magdata_outlier_high <- soil %>% 
+  filter(traffic_class == "high") %>% 
+  filter(avg_outlier == "outlier") 
+
+g1 <- soil %>% 
+  filter(traffic_class == "low") %>% 
+  filter(avg_outlier == "average") %>% 
+  ggplot(aes(x = distance_cm,
+         y = sus_avg)) +
+  geom_line(aes(color = road)) +
+  labs(title = "Magnetic Susceptibility Measurements (SI) from Low Traffic Roads", 
+       y = "", 
+       x ="distance from road (cm)", 
+       color = "") +
+  geom_point(data = magdata_outlier_low, 
+             aes(x = distance_cm,
+                 y = sus_avg,
+                 color = road)) +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  scale_color_manual(values = c("#C7653A", "#C8A92A", "#315C62", "#E9C2BD", "#A28BA4", "#AAC694", "#769194")) +
+  ylim(0, 0.004)
+
+
+g2 <- soil %>% 
+  filter(traffic_class == "medium") %>%
+  filter(avg_outlier == "average") %>% 
+  ggplot(aes(x = distance_cm,
+             y = sus_avg)) +
+  geom_line(aes(color = road)) +
+  labs(title = "Magnetic Susceptibility Measurements (SI) from Medium Traffic Roads", 
+       y = "", 
+       x ="distance from road (cm)", 
+       color = "") +
+  geom_point(data = magdata_outlier_medium, 
+             aes(x = distance_cm, y = sus_avg, color = road)) +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  scale_color_manual(values = c("#C7653A", "#C8A92A", "#315C62")) +
+  ylim(0, 0.004)
+
+g3 <- soil %>% 
+  filter(traffic_class == "high") %>% 
+  filter(avg_outlier == "average") %>% 
+  ggplot(aes(x = distance_cm,
+             y = sus_avg)) +
+  geom_line(aes(color = road)) +
+  labs(title = "Magnetic Susceptibility Measurements (SI) from High Traffic Roads", 
+       y = "", 
+       x ="distance from road (cm)", 
+       color = "") +
+  geom_point(data = magdata_outlier_high, 
+             aes(x = distance_cm, y = sus_avg, color = road)) +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank()) +
+  scale_color_manual(values = c("#E9C2BD", "#A28BA4", "#AAC694", "#769194"))
+  
+(g1/g2/g3) + 
+  plot_annotation(title = "Roadside Magnetic Susceptibility Values From a Range of Traffic Volumes")
+
+```
+
+\
+
+What are these graphs telling us? While the magnetic susceptibility of soils becomes more similar across traffic volumes with distance from the road, we do see an interesting pattern at shorter distances. For high traffic roads, measurements taken at distances less than 200 cm exhibit magnetic susceptibility that is noticeably higher than medium and low traffic roads, even when accounting for scaling of the y-axis. 
+
+What does this mean? This could indicate that more vehicle traffic leads to the emission of more pollutants on roadside soils. 
+
 
 #### Traffic Classification
 
